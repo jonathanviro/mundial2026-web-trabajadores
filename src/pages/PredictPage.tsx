@@ -37,21 +37,22 @@ function buildTeams(matches: any[]) {
 }
 
 export default function PredictPage() {
-  const { phase, matches, predictions, updatePrediction, champion, setChampion, setScreen, reset, setPhaseData } = useStore()
-  const required = phase?.predictions_required || 3
+  const { phase, matches, predictions, updatePrediction, champion, setChampion, setScreen, reset, setPhaseData, predictionDate } = useStore()
+  const isDaily = phase?.daily_predictions === true
+  const required = isDaily ? (matches.length || 1) : (phase?.predictions_required || 3)
   const done = predictions.length
 
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null)
   const [showChampionModal, setShowChampionModal] = useState(false)
 
-  const isGroupPhase = phase?.number === 1
+  const isGroupPhase = phase?.number === 1 && !isDaily
   const teams = useMemo(() => buildTeams(matches), [matches])
 
   useEffect(() => {
     if (phase) return
     webApi.getPhase()
       .then((data) => {
-        setPhaseData(data.phase, data.matches)
+        setPhaseData(data.phase, data.matches, data.prediction_date)
         if (data.already_submitted) setScreen('done')
       })
       .catch(() => {})
@@ -91,15 +92,15 @@ export default function PredictPage() {
       {/* Header */}
       <div className="bg-black/40 backdrop-blur-md border-b border-white/10 flex-shrink-0">
         <div className="flex items-center justify-between px-4 md:px-8 py-3">
-          <button onClick={() => setSelectedTeam(null)}
-            className={`text-[#7a8899] hover:text-white transition-colors ${showTeamGrid ? 'invisible' : ''}`}>
+          <button onClick={() => selectedTeam ? setSelectedTeam(null) : setScreen('dashboard')}
+            className="text-[#7a8899] hover:text-white transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="text-center">
             <div className="text-xs text-[#7a8899] uppercase tracking-wider">
-              {showTeamGrid ? 'Elige un equipo' : selectedTeam || phase?.name}
+              {isDaily ? `Partidos del ${predictionDate || 'mañana'}` : (showTeamGrid ? 'Elige un equipo' : selectedTeam || phase?.name)}
             </div>
-            <div className="text-sm font-bold">{phase?.name}</div>
+            <div className="text-sm font-bold">{isDaily ? `${phase?.name} — Predicción diaria` : phase?.name}</div>
           </div>
           <div className="text-right">
             <div className="text-xs text-[#7a8899]">Predicciones</div>
@@ -263,7 +264,7 @@ export default function PredictPage() {
           )}
 
           {/* Champion section */}
-          {done >= required && (
+          {!isDaily && done >= required && (
             <div className="w-full max-w-4xl mt-8 mx-auto">
               <div className="text-center text-sm font-bold uppercase tracking-wider text-yellow-500 mb-3">
                 Mi campeón del mundo
@@ -297,25 +298,31 @@ export default function PredictPage() {
         </button>
       )}
 
-      {/* Ver resumen */}
-      <div className="w-full max-w-4xl mt-6 mx-auto">
+      {/* Bottom actions */}
+      <div className="w-full max-w-4xl mt-6 mx-auto space-y-3">
+        {isDaily && (
+          <button onClick={() => setScreen('ranking')}
+            className="w-full py-2 px-6 rounded-xl font-semibold text-sm border border-white/10 text-[#7a8899] hover:text-accent hover:border-accent/40 transition-all">
+            Ver Ranking General
+          </button>
+        )}
         <button onClick={() => {
             if (done < required) {
-              alert(`Debes hacer al menos ${required} predicciones`)
+              alert(isDaily ? 'Debes predecir al menos 1 partido' : `Debes hacer al menos ${required} predicciones`)
               return
             }
-            if (!champion) {
+            if (!isDaily && !champion) {
               alert('Debes seleccionar un campeón')
               return
             }
             setScreen('confirm')
           }}
           className={`w-full py-3 px-6 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2 ${
-            done >= required && champion
+            done >= required && (isDaily || champion)
               ? 'bg-accent text-white hover:bg-accent/90 active:scale-[0.98]'
               : 'bg-white/10 text-[#7a8899] cursor-not-allowed'
           }`}
-          disabled={done < required || !champion}>
+          disabled={done < required || (!isDaily && !champion)}>
           Ver resumen <ArrowRight className="w-4 h-4" />
         </button>
       </div>

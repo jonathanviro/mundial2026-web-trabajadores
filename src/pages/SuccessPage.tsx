@@ -3,6 +3,8 @@ import { useStore } from '../store'
 import { CheckCircle, Home } from 'lucide-react'
 
 export default function SuccessPage() {
+  const { phase } = useStore()
+  const isDaily = phase?.daily_predictions === true
   const [countdown, setCountdown] = useState(10)
 
   const handleExit = () => {
@@ -39,7 +41,9 @@ export default function SuccessPage() {
       <div>
         <h2 className="text-2xl font-bold mb-1">¡Predicciones enviadas!</h2>
         <p className="text-sm text-[#7a8899]">
-          Tus predicciones han sido registradas exitosamente.
+          {isDaily
+            ? 'Tus predicciones para mañana han sido registradas. Vuelve mañana para los siguientes partidos.'
+            : 'Tus predicciones han sido registradas exitosamente.'}
         </p>
       </div>
 

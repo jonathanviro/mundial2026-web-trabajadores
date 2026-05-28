@@ -3,15 +3,10 @@ import { useStore } from "./store";
 import { webApi } from "./api";
 import { getDomain } from "./lib/utils";
 import LoginPage from "./pages/LoginPage";
-import PredictPage from "./pages/PredictPage";
-import ConfirmPage from "./pages/ConfirmPage";
-import SuccessPage from "./pages/SuccessPage";
-import MyPredictionsPage from "./pages/MyPredictionsPage";
-import DonePage from "./pages/DonePage";
+import DashboardPage from "./pages/DashboardPage";
 
 export default function App() {
-  const { screen, setScreen, setCampaign, setEmployee, campaign, employee } =
-    useStore();
+  const { screen, setScreen, setCampaign, setEmployee } = useStore();
   const initRef = useRef(false);
 
   useEffect(() => {
@@ -24,7 +19,7 @@ export default function App() {
     if (storedEmployee && storedCampaign) {
       setEmployee(JSON.parse(storedEmployee));
       setCampaign(JSON.parse(storedCampaign));
-      setScreen("predict");
+      setScreen("dashboard");
       return;
     }
 
@@ -41,6 +36,8 @@ export default function App() {
       });
   }, []);
 
+  const { campaign } = useStore();
+
   const bgStyle = campaign?.web_bg_url
     ? {
         backgroundImage: `url(${campaign.web_bg_url})`,
@@ -49,34 +46,9 @@ export default function App() {
       }
     : {};
 
-  const isFullScreen =
-    screen === "predict" ||
-    screen === "confirm" ||
-    screen === "my-predictions" ||
-    screen === "done";
-
-  if (isFullScreen) {
-    return (
-      <div
-        className="h-screen flex flex-col"
-        style={{
-          background: campaign?.web_bg_url
-            ? undefined
-            : "linear-gradient(135deg, #0f1923 0%, #1a2332 50%, #1B3A5C 100%)",
-          ...bgStyle,
-        }}
-      >
-        {screen === "predict" && <PredictPage />}
-        {screen === "confirm" && <ConfirmPage />}
-        {screen === "my-predictions" && <MyPredictionsPage />}
-        {screen === "done" && <DonePage />}
-      </div>
-    );
-  }
-
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center p-4"
+      className="h-screen flex flex-col"
       style={{
         background: campaign?.web_bg_url
           ? undefined
@@ -84,27 +56,31 @@ export default function App() {
         ...bgStyle,
       }}
     >
-      <div className="w-full max-w-4xl animate-fade-in">
-        {campaign?.logo_url && (
-          <div className="flex justify-center mb-6">
-            <img
-              src={campaign.logo_url}
-              alt="Logo"
-              className="h-16 object-contain"
-            />
+      {screen === "dashboard" && <DashboardPage />}
+
+      {screen === "login" && (
+        <div className="flex-1 overflow-y-auto">
+          <div className="min-h-full flex flex-col items-center justify-center p-4">
+            <div className="w-full max-w-4xl animate-fade-in py-6">
+              {campaign?.logo_url && (
+                <div className="flex justify-center mb-6">
+                  <img src={campaign.logo_url} alt="Logo" className="h-16 object-contain" />
+                </div>
+              )}
+              <LoginPage />
+            </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {screen === "login" && <LoginPage />}
-        {screen === "success" && <SuccessPage />}
-
-        {screen === "splash" && (
-          <div className="text-center py-20">
+      {screen === "splash" && (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
             <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto" />
             <p className="text-[#7a8899] mt-4">Cargando...</p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

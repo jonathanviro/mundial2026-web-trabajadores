@@ -30,17 +30,23 @@ export const webApi = {
   campaignByDomain: (domain: string, slug?: string) =>
     api.post('/web/campaign-by-domain', { domain, slug }).then((r) => r.data),
 
-  login: (code: string, campaign_id: number, extra?: { nombres?: string; apellidos?: string; email?: string; telefono?: string }) =>
-    api.post('/web/login', { code, campaign_id, ...extra }).then((r) => r.data),
+  login: (code: string, password: string, campaign_id: number, extra?: { nombres?: string; apellidos?: string; email?: string; telefono?: string }) =>
+    api.post('/web/login', { code, password, campaign_id, ...extra }).then((r) => r.data),
 
   getPhase: () =>
     api.get('/web/phase').then((r) => r.data),
 
-  submitPredictions: (data: { predictions: { match_id: number; goals_local: number; goals_visitor: number }[]; champion_team?: string }) =>
+  submitPredictions: (data: { predictions: { match_id: number; goals_local: number; goals_visitor: number }[]; champion_team?: string; prediction_date?: string }) =>
     api.post('/web/predict', data).then((r) => r.data),
 
   myPredictions: () =>
     api.get('/web/my-predictions').then((r) => r.data),
+
+  getRanking: () =>
+    api.get('/web/ranking').then((r) => r.data),
+
+  getInstructions: () =>
+    api.get('/web/instructions').then((r) => r.data),
 
   log: (action: string, metadata?: any) =>
     api.post('/web/log', { action, metadata }).catch(() => {}),

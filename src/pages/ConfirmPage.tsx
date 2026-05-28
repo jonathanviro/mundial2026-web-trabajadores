@@ -5,7 +5,8 @@ import { Flag } from '../components/Flag'
 import { ArrowLeft, Check, AlertTriangle } from 'lucide-react'
 
 export default function ConfirmPage() {
-  const { phase, matches, predictions, champion, setScreen, setSubmitting, submitting, error, setError } = useStore()
+  const { phase, matches, predictions, champion, predictionDate, setScreen, setSubmitting, submitting, error, setError } = useStore()
+  const isDaily = phase?.daily_predictions === true
   const [done, setDone] = useState(false)
 
   const getMatch = (matchId: number) => matches.find((m) => m.id === matchId)
@@ -20,7 +21,8 @@ export default function ConfirmPage() {
           goals_local: p.goals_local,
           goals_visitor: p.goals_visitor,
         })),
-        champion_team: champion || undefined,
+        champion_team: isDaily ? undefined : (champion || undefined),
+        prediction_date: isDaily ? (predictionDate || undefined) : undefined,
       })
       setDone(true)
       setScreen('success')
@@ -36,7 +38,7 @@ export default function ConfirmPage() {
       {/* Header */}
       <div className="bg-black/40 backdrop-blur-md border-b border-white/10 flex-shrink-0 px-4 md:px-8 py-4">
         <div className="flex items-center justify-between">
-          <button onClick={() => setScreen('predict')}
+          <button onClick={() => setScreen('dashboard')}
             className="text-[#7a8899] hover:text-white transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -71,7 +73,7 @@ export default function ConfirmPage() {
               )
             })}
 
-            {champion && (
+            {!isDaily && champion && (
               <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3 text-center">
                 <p className="text-xs text-[#7a8899] mb-1">Campeón</p>
                 <p className="font-semibold text-yellow-500 flex items-center justify-center gap-2">
