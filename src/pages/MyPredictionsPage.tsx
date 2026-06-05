@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useStore } from '../store'
 import { webApi } from '../api'
 import { Flag } from '../components/Flag'
-import { ArrowLeft, Calendar } from 'lucide-react'
+import { ArrowLeft, Calendar, Trophy, ArrowRight } from 'lucide-react'
 import type { Registration } from '../types'
 
 export default function MyPredictionsPage() {
@@ -26,7 +26,10 @@ export default function MyPredictionsPage() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h2 className="font-bold text-base">Mis predicciones</h2>
-          <div className="w-5" />
+          <button onClick={() => setScreen('ranking')}
+            className="text-[#7a8899] hover:text-accent transition-colors text-sm flex items-center gap-1">
+            Ranking <Trophy className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 
@@ -46,22 +49,33 @@ export default function MyPredictionsPage() {
             <div className="space-y-4">
               {registrations.map((reg) => (
                 <div key={reg.id} className="bg-white/10 backdrop-blur-md rounded-xl p-4 md:p-5 border border-white/10">
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-2">
                     <span className="font-semibold text-sm">{reg.phase?.name}</span>
                     <span className="text-xs text-[#7a8899]">
-                      {new Date(reg.registered_at).toLocaleDateString('es-EC')}
+                      {reg.prediction_date
+                        ? `Partidos: ${reg.prediction_date}`
+                        : new Date(reg.registered_at).toLocaleDateString('es-EC')}
                     </span>
                   </div>
+                  {reg.total_points !== undefined && (
+                    <div className="text-center mb-3 py-1.5 rounded-lg bg-accent/10 border border-accent/20">
+                      <span className="text-sm font-bold text-accent">{reg.total_points} pts</span>
+                      <span className="text-xs text-[#7a8899] ml-2">({reg.correct_predictions || 0} aciertos)</span>
+                    </div>
+                  )}
                   <div className="space-y-2">
-                    {reg.predictions?.map((pred) => (
-                      <div key={pred.match_id}
+                    {reg.predictions?.map((pred: any) => (
+                      <div key={pred.match_id || pred.id}
                         className="flex items-center justify-between gap-3 text-sm">
                         <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
                           <span className="truncate text-[#7a8899]">{pred.match?.team_local}</span>
                           <Flag team={pred.match?.team_local} size={16} />
                         </div>
-                        <span className={`font-mono font-bold flex-shrink-0 ${pred.is_correct ? 'text-green-400' : 'text-accent'}`}>
+                        <span className={`font-mono font-bold flex-shrink-0 ${pred.is_correct ? 'text-green-400' : (pred.points && pred.points > 0 ? 'text-yellow-400' : 'text-accent')}`}>
                           {pred.goals_local} - {pred.goals_visitor}
+                          {pred.points !== undefined && pred.points > 0 && (
+                            <span className="ml-1 text-[10px]">+{pred.points}</span>
+                          )}
                         </span>
                         <div className="flex items-center gap-2 min-w-0 flex-1">
                           <Flag team={pred.match?.team_visitor} size={16} />
@@ -81,6 +95,12 @@ export default function MyPredictionsPage() {
               ))}
             </div>
           )}
+          <div className="mt-6 text-center">
+            <button onClick={() => setScreen('dashboard')}
+              className="text-sm text-[#7a8899] hover:text-accent transition-colors flex items-center justify-center gap-1 mx-auto">
+              Volver al inicio <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

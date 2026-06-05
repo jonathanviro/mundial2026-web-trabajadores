@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Screen, Campaign, Employee, Phase, Match, Prediction } from '../types'
+import type { Screen, Campaign, Employee, Phase, Match, Prediction, RankingEntry } from '../types'
 
 interface AppStore {
   screen: Screen
@@ -13,7 +13,9 @@ interface AppStore {
 
   phase: Phase | null
   matches: Match[]
-  setPhaseData: (phase: Phase | null, matches: Match[]) => void
+  allMatches: Match[]
+  predictionDate: string | null
+  setPhaseData: (phase: Phase | null, matches: Match[], predictionDate?: string | null, allMatches?: Match[]) => void
 
   predictions: Prediction[]
   updatePrediction: (match_id: number, field: 'goals_local' | 'goals_visitor', value: number) => void
@@ -21,6 +23,9 @@ interface AppStore {
 
   champion: string | null
   setChampion: (team: string | null) => void
+
+  ranking: RankingEntry[]
+  setRanking: (r: RankingEntry[]) => void
 
   submitting: boolean
   setSubmitting: (v: boolean) => void
@@ -43,7 +48,9 @@ export const useStore = create<AppStore>((set) => ({
 
   phase: null,
   matches: [],
-  setPhaseData: (phase, matches) => set({ phase, matches }),
+  allMatches: [],
+  predictionDate: null,
+  setPhaseData: (phase, matches, predictionDate = null, allMatches = []) => set({ phase, matches, predictionDate, allMatches }),
 
   predictions: [],
   updatePrediction: (match_id, field, value) =>
@@ -68,6 +75,9 @@ export const useStore = create<AppStore>((set) => ({
   champion: null,
   setChampion: (champion) => set({ champion }),
 
+  ranking: [],
+  setRanking: (ranking) => set({ ranking }),
+
   submitting: false,
   setSubmitting: (submitting) => set({ submitting }),
 
@@ -79,8 +89,11 @@ export const useStore = create<AppStore>((set) => ({
       screen: 'splash',
       phase: null,
       matches: [],
+      allMatches: [],
+      predictionDate: null,
       predictions: [],
       champion: null,
+      ranking: [],
       submitting: false,
       error: null,
     }),
