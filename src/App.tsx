@@ -63,8 +63,12 @@ export default function App() {
           <div className="min-h-full flex flex-col items-center justify-center p-4">
             <div className="w-full max-w-4xl animate-fade-in py-6">
               {campaign?.logo_url && (
-                <div className="flex justify-center mb-6">
-                  <img src={campaign.logo_url} alt="Logo" className="h-16 object-contain" />
+                <div className="flex justify-center mb-12">
+                  <img
+                    src={campaign.logo_url}
+                    alt="Logo"
+                    className="h-48 object-contain"
+                  />
                 </div>
               )}
               <LoginPage />

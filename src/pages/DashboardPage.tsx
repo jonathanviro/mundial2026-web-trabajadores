@@ -109,7 +109,9 @@ export default function DashboardPage() {
           .sort((a: any, b: any) => (a.date || "").localeCompare(b.date || ""));
         const firstDate = upcoming.length > 0 ? upcoming[0].date : null;
         setUpcomingDate(firstDate);
-        setNextBatch(firstDate ? upcoming.filter((m: any) => m.date === firstDate) : []);
+        setNextBatch(
+          firstDate ? upcoming.filter((m: any) => m.date === firstDate) : [],
+        );
 
         if (employee) {
           setMyRanking(
@@ -135,9 +137,12 @@ export default function DashboardPage() {
 
   const allPreds = registrations.flatMap((r) => r.predictions || []);
   const totalPreds = allPreds.length;
-  const correctResults = allPreds.filter((p: any) => p.points && p.points > 0).length;
+  const correctResults = allPreds.filter(
+    (p: any) => p.points && p.points > 0,
+  ).length;
   const exactScores = allPreds.filter((p: any) => p.points === 2).length;
-  const accuracy = totalPreds > 0 ? Math.round((correctResults / totalPreds) * 100) : 0;
+  const accuracy =
+    totalPreds > 0 ? Math.round((correctResults / totalPreds) * 100) : 0;
 
   const todayStr = new Date().toISOString().split("T")[0];
   const last7Days = Array.from({ length: 7 }, (_, i) => {
@@ -201,7 +206,7 @@ export default function DashboardPage() {
   const handleLogout = () => {
     sessionStorage.clear();
     reset();
-    setScreen('login');
+    setScreen("login");
   };
 
   if (loading) {
@@ -270,7 +275,7 @@ export default function DashboardPage() {
             <div className="bg-white/10 backdrop-blur-md border border-accent/30 rounded-xl overflow-hidden">
               <div className="px-4 py-3 border-b border-white/10">
                 <p className="font-semibold text-sm text-accent">
-                  📅 {formatDate(predictionDate!)} — {matches.length} partido
+                  📅 {formatDate(predictionDate!)} - {matches.length} partido
                   {matches.length !== 1 ? "s" : ""}
                 </p>
                 <p className="text-xs text-[#7a8899]">
@@ -282,7 +287,8 @@ export default function DashboardPage() {
                   const pred = predictions.find((p) => p.match_id === match.id);
                   const isPredicted = !!pred;
                   return (
-                    <div key={match.id}
+                    <div
+                      key={match.id}
                       className={`px-2.5 py-2 rounded-lg transition-all ${isPredicted ? "bg-green-500/15" : "bg-white/[0.04]"}`}
                     >
                       {isPredicted ? (
@@ -290,19 +296,35 @@ export default function DashboardPage() {
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-1.5 min-w-0">
                               <Flag team={match.team_local} size={18} />
-                              <span className="text-xs font-medium">{match.team_local}</span>
+                              <span className="text-xs font-medium">
+                                {match.team_local}
+                              </span>
                             </div>
-                            <Stepper value={pred.goals_local} onChange={(v) => updatePrediction(match.id, "goals_local", v)} />
+                            <Stepper
+                              value={pred.goals_local}
+                              onChange={(v) =>
+                                updatePrediction(match.id, "goals_local", v)
+                              }
+                            />
                           </div>
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-1.5 min-w-0">
                               <Flag team={match.team_visitor} size={18} />
-                              <span className="text-xs font-medium">{match.team_visitor}</span>
+                              <span className="text-xs font-medium">
+                                {match.team_visitor}
+                              </span>
                             </div>
-                            <Stepper value={pred.goals_visitor} onChange={(v) => updatePrediction(match.id, "goals_visitor", v)} />
+                            <Stepper
+                              value={pred.goals_visitor}
+                              onChange={(v) =>
+                                updatePrediction(match.id, "goals_visitor", v)
+                              }
+                            />
                           </div>
-                          <button onClick={() => handleRemovePrediction(match.id)}
-                            className="w-full text-center text-xs text-red-400 font-medium bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-md py-1 transition-all mt-1">
+                          <button
+                            onClick={() => handleRemovePrediction(match.id)}
+                            className="w-full text-center text-xs text-red-400 font-medium bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-md py-1 transition-all mt-1"
+                          >
                             ✖ Quitar predicción
                           </button>
                         </div>
@@ -310,16 +332,24 @@ export default function DashboardPage() {
                         /* Not predicted: always horizontal */
                         <div className="flex items-center gap-1">
                           <div className="flex items-center gap-1 min-w-0 flex-1 justify-end">
-                            <span className="text-xs truncate">{match.team_local}</span>
+                            <span className="text-xs truncate">
+                              {match.team_local}
+                            </span>
                             <Flag team={match.team_local} size={16} />
                           </div>
-                          <span className="text-[10px] text-[#4a5568] uppercase mx-1 flex-shrink-0">vs</span>
+                          <span className="text-[10px] text-[#4a5568] uppercase mx-1 flex-shrink-0">
+                            vs
+                          </span>
                           <div className="flex items-center gap-1 min-w-0 flex-1">
                             <Flag team={match.team_visitor} size={16} />
-                            <span className="text-xs truncate">{match.team_visitor}</span>
+                            <span className="text-xs truncate">
+                              {match.team_visitor}
+                            </span>
                           </div>
-                          <button onClick={() => handleAdd(match.id)}
-                            className="text-xs px-2 py-1 rounded-md bg-accent/20 text-accent font-semibold hover:bg-accent/30 whitespace-nowrap flex-shrink-0">
+                          <button
+                            onClick={() => handleAdd(match.id)}
+                            className="text-xs px-2 py-1 rounded-md bg-accent/20 text-accent font-semibold hover:bg-accent/30 whitespace-nowrap flex-shrink-0"
+                          >
                             + Predecir
                           </button>
                         </div>
@@ -367,13 +397,13 @@ export default function DashboardPage() {
                 📅 Sin partidos programados
               </p>
               <p className="text-sm text-[#4a5568] mt-1">
-                No hay partidos para mañana.
+                No hay partidos disponibles para la próxima fecha.
               </p>
             </div>
           ) : isDaily && matches.length === 0 && predictionDate ? (
             <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-6 text-center">
               <p className="text-lg font-bold text-[#7a8899]">
-                ⏳ Sin partidos mañana
+                ⏳ Sin partidos disponibles
               </p>
               <p className="text-sm text-[#4a5568] mt-1">
                 Vuelve cuando haya partidos disponibles.
@@ -387,19 +417,32 @@ export default function DashboardPage() {
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div>
                   <p className="text-xl font-bold text-accent">{accuracy}%</p>
-                  <p className="text-[10px] text-[#7a8899] uppercase tracking-wider">Precisión</p>
+                  <p className="text-[10px] text-[#7a8899] uppercase tracking-wider">
+                    Precisión
+                  </p>
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-green-400">{correctResults}</p>
-                  <p className="text-[10px] text-[#7a8899] uppercase tracking-wider">Aciertos</p>
+                  <p className="text-xl font-bold text-green-400">
+                    {correctResults}
+                  </p>
+                  <p className="text-[10px] text-[#7a8899] uppercase tracking-wider">
+                    Aciertos
+                  </p>
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-yellow-400">{exactScores}</p>
-                  <p className="text-[10px] text-[#7a8899] uppercase tracking-wider">Exactos</p>
+                  <p className="text-xl font-bold text-yellow-400">
+                    {exactScores}
+                  </p>
+                  <p className="text-[10px] text-[#7a8899] uppercase tracking-wider">
+                    Exactos
+                  </p>
                 </div>
               </div>
               <div className="mt-3 h-1 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-green-500 to-accent rounded-full transition-all" style={{ width: `${accuracy}%` }} />
+                <div
+                  className="h-full bg-gradient-to-r from-green-500 to-accent rounded-full transition-all"
+                  style={{ width: `${accuracy}%` }}
+                />
               </div>
             </div>
           )}
@@ -409,16 +452,27 @@ export default function DashboardPage() {
             <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-accent text-sm">📈</span>
-                <h3 className="font-semibold text-sm">Puntaje últimos 7 días</h3>
+                <h3 className="font-semibold text-sm">
+                  Puntaje últimos 7 días
+                </h3>
               </div>
               <div className="flex items-end gap-1.5 h-20">
                 {pointsHistory.map((day) => (
-                  <div key={day.date} className="flex-1 flex flex-col items-center gap-1">
+                  <div
+                    key={day.date}
+                    className="flex-1 flex flex-col items-center gap-1"
+                  >
                     <div
                       className="w-full rounded-t-sm transition-all bg-gradient-to-t from-accent/60 to-accent"
-                      style={{ height: `${(day.points / maxPoints) * 100}%`, minHeight: day.points > 0 ? "4px" : "2px", opacity: day.points > 0 ? 1 : 0.2 }}
+                      style={{
+                        height: `${(day.points / maxPoints) * 100}%`,
+                        minHeight: day.points > 0 ? "4px" : "2px",
+                        opacity: day.points > 0 ? 1 : 0.2,
+                      }}
                     />
-                    <span className="text-[8px] text-[#4a5568]">{day.date.slice(5)}</span>
+                    <span className="text-[8px] text-[#4a5568]">
+                      {day.date.slice(5)}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -434,7 +488,10 @@ export default function DashboardPage() {
               </div>
               <div className="space-y-1.5">
                 {todayFinished.map((m) => (
-                  <div key={m.id} className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-white/[0.04] text-xs">
+                  <div
+                    key={m.id}
+                    className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-white/[0.04] text-xs"
+                  >
                     <div className="flex items-center gap-1.5 min-w-0 flex-1 justify-end">
                       <span className="truncate">{m.team_local}</span>
                       <Flag team={m.team_local} size={14} />
@@ -453,31 +510,40 @@ export default function DashboardPage() {
           )}
 
           {/* ─── NEXT PREDICTION DATE ─── */}
-          {upcomingDate && upcomingDate !== predictionDate && nextBatch.length > 0 && (
-            <div className="bg-white/10 backdrop-blur-md border border-accent/20 rounded-xl p-4">
-              <div className="text-center mb-3">
-                <p className="text-xs text-accent font-semibold">📅 Próximos partidos: {formatDate(upcomingDate)}</p>
-                <p className="text-[10px] text-[#7a8899] mt-0.5">
-                  Disponibles para predecir el {formatDate(todayStr)}
-                </p>
-              </div>
-              <div className="space-y-1">
-                {nextBatch.map((m) => (
-                  <div key={m.id} className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg bg-white/[0.04] text-xs">
-                    <div className="flex items-center gap-1.5 min-w-0 flex-1 justify-end">
-                      <span className="truncate">{m.team_local}</span>
-                      <Flag team={m.team_local} size={14} />
+          {upcomingDate &&
+            upcomingDate !== predictionDate &&
+            nextBatch.length > 0 && (
+              <div className="bg-white/10 backdrop-blur-md border border-accent/20 rounded-xl p-4">
+                <div className="text-center mb-3">
+                  <p className="text-xs text-accent font-semibold">
+                    📅 Próximos partidos: {formatDate(upcomingDate)}
+                  </p>
+                  <p className="text-[10px] text-[#7a8899] mt-0.5">
+                    Disponibles para predecir el {formatDate(todayStr)}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  {nextBatch.map((m) => (
+                    <div
+                      key={m.id}
+                      className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg bg-white/[0.04] text-xs"
+                    >
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1 justify-end">
+                        <span className="truncate">{m.team_local}</span>
+                        <Flag team={m.team_local} size={14} />
+                      </div>
+                      <span className="text-[10px] text-[#4a5568] flex-shrink-0">
+                        vs
+                      </span>
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                        <Flag team={m.team_visitor} size={14} />
+                        <span className="truncate">{m.team_visitor}</span>
+                      </div>
                     </div>
-                    <span className="text-[10px] text-[#4a5568] flex-shrink-0">vs</span>
-                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                      <Flag team={m.team_visitor} size={14} />
-                      <span className="truncate">{m.team_visitor}</span>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* ─── RANKING SECTION ─── */}
           {topRanking.length > 0 && (
@@ -618,13 +684,15 @@ export default function DashboardPage() {
                     className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/[0.04] text-sm"
                   >
                     <span className="flex items-center gap-1.5 truncate text-[#7a8899]">
-                      <Flag team={match?.team_local} size={16} /> {match?.team_local}
+                      <Flag team={match?.team_local} size={16} />{" "}
+                      {match?.team_local}
                     </span>
                     <span className="font-mono font-bold text-accent mx-2">
                       {pred.goals_local}–{pred.goals_visitor}
                     </span>
                     <span className="flex items-center gap-1.5 truncate text-[#7a8899]">
-                      <Flag team={match?.team_visitor} size={16} /> {match?.team_visitor}
+                      <Flag team={match?.team_visitor} size={16} />{" "}
+                      {match?.team_visitor}
                     </span>
                   </div>
                 );
