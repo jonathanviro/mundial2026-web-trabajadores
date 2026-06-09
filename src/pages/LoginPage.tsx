@@ -15,11 +15,16 @@ export default function LoginPage() {
   const [showForm, setShowForm] = useState(false);
   const [instructions, setInstructions] = useState<string[]>([]);
   const [showInstructions, setShowInstructions] = useState(false);
+  const [autoOpened, setAutoOpened] = useState(false);
 
   useState(() => {
     webApi
       .getInstructions()
-      .then((res) => setInstructions(res.instructions))
+      .then((res) => {
+        setInstructions(res.instructions);
+        setShowInstructions(true);
+        setAutoOpened(true);
+      })
       .catch(() => {});
   });
 
@@ -154,45 +159,26 @@ export default function LoginPage() {
       {/* Botón instrucciones */}
       <button
         type="button"
-        onClick={() => setShowInstructions(true)}
+        onClick={() => setShowInstructions(!showInstructions)}
         className="w-full py-2.5 rounded-lg bg-white/[0.06] border border-white/10 text-sm text-[#b0b8c8]
                    hover:text-accent hover:border-accent/30 transition-all flex items-center justify-center gap-2"
       >
-        Ver instrucciones del juego
+        📖 {showInstructions ? "Cerrar instrucciones" : "Ver instrucciones del juego"}
       </button>
 
       {/* Modal instrucciones */}
       {showInstructions && instructions.length > 0 && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-          onClick={() => setShowInstructions(false)}
         >
           <div
-            className="w-full max-w-md bg-[#1a2332] rounded-2xl border border-white/10 p-5 max-h-[60vh] overflow-y-auto animate-fade-in shadow-2xl"
+            className="w-full max-w-lg bg-[#1a2332] rounded-2xl border border-white/10 p-6 animate-fade-in shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-accent">Instrucciones</h2>
-              <button
-                onClick={() => setShowInstructions(false)}
-                className="text-[#7a8899] hover:text-white p-1"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
+            <div className="mb-4">
+              <h2 className="text-lg font-bold text-accent text-center">Instrucciones</h2>
             </div>
-            <ul className="space-y-2">
+            <ul className="space-y-2 mb-5">
               {instructions.map((text, i) => (
                 <li key={i} className="text-sm text-[#b0b8c8] flex gap-2">
                   <span className="text-accent shrink-0 mt-0.5">•</span>
@@ -200,6 +186,12 @@ export default function LoginPage() {
                 </li>
               ))}
             </ul>
+            <button
+              onClick={() => setShowInstructions(false)}
+              className="w-full py-2.5 rounded-lg bg-accent text-white font-semibold text-sm hover:bg-accent/90 active:scale-[0.98] transition-all"
+            >
+              Comprendo las Instrucciones
+            </button>
           </div>
         </div>
       )}
