@@ -167,7 +167,7 @@ export default function DashboardPage() {
     isDaily && matches.length > 0 && predictionDate && !submitted;
   const doneCount = predictions.length;
 
-  const required = matches.length || 1;
+  const required = matches.length;
 
   const handleAdd = (matchId: number) => {
     if (predictions.find((p) => p.match_id === matchId)) return;
@@ -366,18 +366,18 @@ export default function DashboardPage() {
                   </div>
                 )}
                 <button
-                  onClick={() => (doneCount > 0 ? setShowConfirm(true) : null)}
-                  disabled={doneCount === 0}
+                  onClick={() => (doneCount === required ? setShowConfirm(true) : null)}
+                  disabled={doneCount !== required}
                   className={`w-full py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
-                    doneCount > 0
+                    doneCount === required
                       ? "bg-accent text-white hover:bg-accent/90 active:scale-[0.98]"
-                      : "bg-white/10 text-[#4a5568] cursor-not-allowed"
+                      : "bg-white/10 text-[#e8eaf0] cursor-not-allowed"
                   }`}
                 >
                   <Check className="w-4 h-4" />{" "}
-                  {doneCount > 0
+                  {doneCount === required
                     ? `Enviar predicciones (${doneCount})`
-                    : "Predice al menos 1 partido"}
+                    : `Faltan ${required - doneCount} predicción${required - doneCount !== 1 ? "es" : ""}`}
                 </button>
               </div>
             </div>
@@ -675,6 +675,13 @@ export default function DashboardPage() {
                 <X className="w-5 h-5" />
               </button>
             </div>
+
+            {/* ⚠️ Advertencia */}
+            <div className="p-3 mb-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-xs text-yellow-400 text-center leading-relaxed">
+              Al confirmar y enviar las predicciones, ya no podrás modificarlas.<br />
+              Antes de confirmar asegúrate de tener todas las predicciones que desees.
+            </div>
+
             <div className="space-y-2 mb-4">
               {predictions.map((pred) => {
                 const match = matches.find((m) => m.id === pred.match_id);
@@ -683,14 +690,14 @@ export default function DashboardPage() {
                     key={pred.match_id}
                     className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/[0.04] text-sm"
                   >
-                    <span className="flex items-center gap-1.5 truncate text-[#7a8899]">
+                    <span className="flex items-center gap-1.5 truncate text-[#e8eaf0]">
                       <Flag team={match?.team_local} size={16} />{" "}
                       {match?.team_local}
                     </span>
                     <span className="font-mono font-bold text-accent mx-2">
                       {pred.goals_local}–{pred.goals_visitor}
                     </span>
-                    <span className="flex items-center gap-1.5 truncate text-[#7a8899]">
+                    <span className="flex items-center gap-1.5 truncate text-[#e8eaf0]">
                       <Flag team={match?.team_visitor} size={16} />{" "}
                       {match?.team_visitor}
                     </span>
@@ -704,22 +711,32 @@ export default function DashboardPage() {
                 <span>{error}</span>
               </div>
             )}
-            <button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="w-full py-2.5 rounded-lg bg-accent text-white font-semibold text-sm hover:bg-accent/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-40"
-            >
-              {submitting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />{" "}
-                  Enviando...
-                </>
-              ) : (
-                <>
-                  <Check className="w-4 h-4" /> Confirmar y enviar
-                </>
-              )}
-            </button>
+
+            {/* Botones */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 py-2.5 rounded-lg bg-white/10 text-sm text-[#e8eaf0] font-semibold hover:bg-white/20 transition-all"
+              >
+                Modificar predicciones
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="flex-1 py-2.5 rounded-lg bg-accent text-white font-semibold text-sm hover:bg-accent/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+              >
+                {submitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />{" "}
+                    Enviando...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" /> Enviar
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
