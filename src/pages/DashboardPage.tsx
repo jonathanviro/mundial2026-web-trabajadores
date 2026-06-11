@@ -163,6 +163,9 @@ export default function DashboardPage() {
     (m) => m.date === todayStr && m.finished,
   );
   // upcomingDate and nextBatch are set in the useEffect above
+  const availableDateStr = upcomingDate
+    ? new Date(new Date(upcomingDate + 'T00:00:00').getTime() - 86400000).toISOString().split('T')[0]
+    : null;
 
   const canPredict =
     isDaily && matches.length > 0 && predictionDate && !submitted;
@@ -529,7 +532,7 @@ export default function DashboardPage() {
                     📅 Próximos partidos: {formatDate(upcomingDate)}
                   </p>
                   <p className="text-[10px] text-[#7a8899] mt-0.5">
-                    Disponibles para predecir el {formatDate(todayStr)}
+                    Disponibles para predecir el {availableDateStr ? formatDate(availableDateStr) : ''}
                   </p>
                 </div>
                 <div className="space-y-1">
