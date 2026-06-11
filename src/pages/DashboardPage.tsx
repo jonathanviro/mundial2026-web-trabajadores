@@ -84,6 +84,7 @@ export default function DashboardPage() {
   const [nextBatch, setNextBatch] = useState<Match[]>([]);
 
   const isDaily = phase?.daily_predictions === true;
+  const allDatesDone = isDaily && !predictionDate && !loading && registrations.length > 0;
 
   useEffect(() => {
     Promise.all([
@@ -389,6 +390,15 @@ export default function DashboardPage() {
               </p>
               <p className="text-xs text-[#7a8899] mt-1">
                 Los resultados se actualizarán cuando terminen los partidos
+              </p>
+            </div>
+          ) : allDatesDone ? (
+            <div className="bg-white/10 backdrop-blur-md border border-green-500/30 rounded-xl p-6 text-center">
+              <p className="text-lg font-bold text-green-400">
+                🎉 Completaste todas las predicciones
+              </p>
+              <p className="text-sm text-[#7a8899] mt-1">
+        Revisá los resultados y el ranking general.
               </p>
             </div>
           ) : isDaily && !predictionDate ? (
