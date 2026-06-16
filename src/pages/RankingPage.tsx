@@ -44,14 +44,14 @@ export default function RankingPage() {
 
       {/* Limit selector */}
       <div className="flex-shrink-0 px-4 md:px-8 py-3 border-b border-white/10">
-        <div className="flex items-center gap-2 max-w-2xl mx-auto">
+        <div className="flex flex-wrap items-center gap-2 max-w-2xl mx-auto">
           <span className="text-xs text-[#7a8899] uppercase tracking-wider font-semibold">Mostrar:</span>
-          <div className="flex gap-1">
+          <div className="flex flex-wrap gap-1">
             {LIMITS.map((opt) => (
               <button
                 key={opt.value}
                 onClick={() => setLimit(opt.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`px-2 md:px-3 py-1.5 rounded-lg text-[11px] md:text-xs font-semibold transition-all ${
                   limit === opt.value
                     ? "bg-accent text-white"
                     : "bg-white/10 text-[#7a8899] hover:text-[#e8eaf0]"
