@@ -134,6 +134,8 @@ export default function DashboardPage() {
   }, []);
 
   const topRanking = ranking.slice(0, 10);
+  const myRankEntry = ranking.find((r) => r.code === employee?.code);
+  const showMyRankPos = myRankEntry && myRankEntry.position > 10;
   const lastRegs = registrations.slice(0, 5);
 
   const allPreds = registrations.flatMap((r) => r.predictions || []);
@@ -564,6 +566,10 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2 mb-3">
                 <Trophy className="w-4 h-4 text-accent" />
                 <h3 className="font-semibold text-sm">Ranking General</h3>
+                <div className="flex-1" />
+                <button onClick={() => setScreen("ranking")} className="text-xs text-accent hover:text-accent/80 transition-colors">
+                  Ver todos →
+                </button>
               </div>
               <div className="space-y-1">
                 {topRanking.map((entry) => {
@@ -591,6 +597,13 @@ export default function DashboardPage() {
                     </div>
                   );
                 })}
+                {showMyRankPos && myRankEntry && (
+                  <div className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm border border-dashed border-accent/40 mt-2">
+                    <span className="text-[10px] text-accent font-semibold uppercase tracking-wider">📍 Tu posición</span>
+                    <span className="flex-1" />
+                    <span className="font-bold text-accent text-xs">#{myRankEntry.position} · {myRankEntry.total_points} pts</span>
+                  </div>
+                )}
               </div>
             </div>
           )}

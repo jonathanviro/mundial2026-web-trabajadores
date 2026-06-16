@@ -27,7 +27,7 @@ export default function RankingPage() {
   const showMyPosition = myEntry && (limit === 0 || myEntry.position > limit);
 
   return (
-    <div className="h-full flex flex-col bg-[#0f1923]">
+    <div className="h-full flex flex-col">
       {/* Header */}
       <div className="bg-black/40 backdrop-blur-md border-b border-white/10 flex-shrink-0 px-4 md:px-8 py-4">
         <div className="flex items-center justify-between">
