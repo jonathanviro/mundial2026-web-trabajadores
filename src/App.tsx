@@ -4,6 +4,7 @@ import { webApi } from "./api";
 import { getDomain } from "./lib/utils";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
+import RankingPage from "./pages/RankingPage";
 
 export default function App() {
   const { screen, setScreen, setCampaign, setEmployee } = useStore();
@@ -57,6 +58,7 @@ export default function App() {
       }}
     >
       {screen === "dashboard" && <DashboardPage />}
+      {screen === "ranking" && <RankingPage />}
 
       {screen === "login" && (
         <div className="flex-1 overflow-y-auto">
