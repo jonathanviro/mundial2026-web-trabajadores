@@ -637,7 +637,7 @@ export default function DashboardPage() {
                       )}
                     </div>
                     <div className="space-y-1">
-                      {(reg.predictions || []).slice(0, 4).map((pred: any) => {
+                      {(reg.predictions || []).map((pred: any) => {
                         const gl = pred.match?.goals_local;
                         const gv = pred.match?.goals_visitor;
                         const hasResult =
