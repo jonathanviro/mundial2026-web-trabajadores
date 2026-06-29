@@ -136,7 +136,7 @@ export default function DashboardPage() {
   const topRanking = ranking.slice(0, 10);
   const myRankEntry = ranking.find((r) => r.code === employee?.code);
   const showMyRankPos = myRankEntry && myRankEntry.position > 10;
-  const lastRegs = registrations.slice(0, 5);
+  const lastRegs = registrations;
 
   const allPreds = registrations.flatMap((r) => r.predictions || []);
   const totalPreds = allPreds.length;
