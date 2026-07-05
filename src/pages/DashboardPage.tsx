@@ -10,6 +10,8 @@ import {
   Trophy,
   X,
   AlertTriangle,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import type { RankingEntry, Registration, Match } from "../types";
 
@@ -67,6 +69,10 @@ export default function DashboardPage() {
     setPhaseData,
     setRanking,
     ranking,
+    rankingGroups,
+    setRankingGroups,
+    activeGroupId,
+    setActiveGroupId,
     submitting,
     setSubmitting,
     error,
@@ -82,6 +88,30 @@ export default function DashboardPage() {
   const [submittedDate, setSubmittedDate] = useState<string | null>(null);
   const [upcomingDate, setUpcomingDate] = useState<string | null>(null);
   const [nextBatch, setNextBatch] = useState<Match[]>([]);
+  const [collapsedPhases, setCollapsedPhases] = useState<Set<number>>(() => new Set([1, 2, 3, 4, 5, 6]));
+
+  const togglePhase = (num: number) => {
+    setCollapsedPhases((prev) => {
+      const next = new Set(prev);
+      if (next.has(num)) next.delete(num);
+      else next.add(num);
+      return next;
+    });
+  };
+
+  const registrationsByPhase = useMemo(() => {
+    const map = new Map<number, { phase: import("../types").Phase; regs: typeof registrations; total: number }>();
+    for (const reg of registrations) {
+      const num = reg.phase?.number ?? 0;
+      if (!map.has(num)) map.set(num, { phase: reg.phase, regs: [], total: 0 });
+      const entry = map.get(num)!;
+      entry.regs.push(reg);
+      entry.total += reg.total_points || 0;
+    }
+    return Array.from(map.entries())
+      .sort(([a], [b]) => b - a)
+      .map(([, v]) => v);
+  }, [registrations]);
 
   const isDaily = phase?.daily_predictions === true;
   const allDatesDone = isDaily && !predictionDate && !loading && registrations.length > 0;
@@ -90,9 +120,10 @@ export default function DashboardPage() {
     Promise.all([
       webApi.getPhase(),
       webApi.getRanking(),
+      webApi.getRankings(),
       webApi.myPredictions(),
     ])
-      .then(([phaseData, rankRes, preds]) => {
+      .then(([phaseData, rankRes, rankingsRes, preds]) => {
         setPhaseData(
           phaseData.phase,
           phaseData.matches,
@@ -100,7 +131,29 @@ export default function DashboardPage() {
           phaseData.all_matches,
         );
         setRanking(rankRes.ranking || []);
+        setRankingGroups(rankingsRes.groups || []);
         setRegistrations(preds || []);
+
+        // Determine active ranking group from current phase
+        const phaseNum = phaseData.phase?.number;
+        const groups = rankingsRes.groups || [];
+        const activeGroup = groups.find((g: any) =>
+          g.phase_numbers.includes(phaseNum),
+        );
+        if (activeGroup) {
+          setActiveGroupId(activeGroup.id);
+        } else if (groups.length > 0) {
+          setActiveGroupId(groups[0].id);
+        }
+
+        // Expand only the active phase, collapse others
+        if (phaseNum) {
+          setCollapsedPhases((prev) => {
+            const next = new Set([1, 2, 3, 4, 5, 6]);
+            next.delete(phaseNum);
+            return next;
+          });
+        }
 
         // Compute upcoming matches
         const all = phaseData.all_matches || [];
@@ -114,9 +167,9 @@ export default function DashboardPage() {
           firstDate ? upcoming.filter((m: any) => m.date === firstDate) : [],
         );
 
-        if (employee) {
+        if (employee && activeGroup) {
           setMyRanking(
-            (rankRes.ranking || []).find(
+            (activeGroup.ranking || []).find(
               (r: RankingEntry) => r.code === employee.code,
             ) || null,
           );
@@ -133,8 +186,10 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const topRanking = ranking.slice(0, 10);
-  const myRankEntry = ranking.find((r) => r.code === employee?.code);
+  const activeGroup = rankingGroups.find((g) => g.id === activeGroupId);
+  const activeRanking = activeGroup?.ranking || ranking;
+  const topRanking = activeRanking.slice(0, 10);
+  const myRankEntry = activeRanking.find((r) => r.code === employee?.code);
   const showMyRankPos = myRankEntry && myRankEntry.position > 10;
   const lastRegs = registrations;
 
@@ -565,9 +620,14 @@ export default function DashboardPage() {
             <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Trophy className="w-4 h-4 text-accent" />
-                <h3 className="font-semibold text-sm">Ranking General</h3>
+                <h3 className="font-semibold text-sm">
+                  {activeGroup?.name || "Ranking"}
+                </h3>
                 <div className="flex-1" />
-                <button onClick={() => setScreen("ranking")} className="text-xs text-accent hover:text-accent/80 transition-colors">
+                <button
+                  onClick={() => setScreen("ranking")}
+                  className="text-xs text-accent hover:text-accent/80 transition-colors"
+                >
                   Ver todos →
                 </button>
               </div>
@@ -609,77 +669,97 @@ export default function DashboardPage() {
           )}
 
           {/* ─── RESULTS SECTION ─── */}
-          {lastRegs.length > 0 && (
+          {registrationsByPhase.length > 0 && (
             <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-accent text-sm">📋</span>
                 <h3 className="font-semibold text-sm">Mis resultados</h3>
               </div>
               <div className="space-y-2">
-                {lastRegs.map((reg) => (
-                  <div key={reg.id} className="bg-white/[0.04] rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[10px] text-[#7a8899] uppercase">
-                        {reg.prediction_date
-                          ? formatDate(reg.prediction_date)
-                          : new Date(reg.registered_at).toLocaleDateString(
-                              "es-EC",
-                            )}
-                      </span>
-                      {reg.total_points !== undefined && (
-                        <span
-                          className={`text-xs font-bold ${reg.total_points > 0 ? "text-green-400" : "text-[#7a8899]"}`}
-                        >
-                          {reg.total_points > 0
-                            ? `+${reg.total_points} pts`
-                            : "0 pts"}
+                {registrationsByPhase.map(({ phase, regs, total }) => {
+                  const isCollapsed = collapsedPhases.has(phase?.number);
+                  return (
+                    <div key={phase?.number || 0} className="bg-white/[0.04] rounded-lg overflow-hidden">
+                      <button
+                        onClick={() => togglePhase(phase?.number)}
+                        className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-white/[0.03] transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          {isCollapsed ? (
+                            <ChevronRight className="w-3.5 h-3.5 text-[#7a8899]" />
+                          ) : (
+                            <ChevronDown className="w-3.5 h-3.5 text-[#7a8899]" />
+                          )}
+                          <span className="text-xs font-semibold text-[#e8eaf0]">
+                            {phase?.name || `Fase ${phase?.number}`}
+                          </span>
+                        </div>
+                        <span className={`text-xs font-bold ${total > 0 ? "text-green-400" : "text-[#7a8899]"}`}>
+                          {total > 0 ? `+${total} pts` : "0 pts"}
                         </span>
+                      </button>
+                      {!isCollapsed && (
+                        <div className="px-3 pb-2 space-y-1">
+                          {regs.map((reg) => (
+                            <div key={reg.id} className="bg-white/[0.04] rounded-lg p-2.5">
+                              <div className="flex items-center justify-between mb-1.5">
+                                <span className="text-[10px] text-[#7a8899] uppercase">
+                                  {reg.prediction_date
+                                    ? formatDate(reg.prediction_date)
+                                    : new Date(reg.registered_at).toLocaleDateString("es-EC")}
+                                </span>
+                                {reg.total_points !== undefined && (
+                                  <span className={`text-xs font-bold ${reg.total_points > 0 ? "text-green-400" : "text-[#7a8899]"}`}>
+                                    {reg.total_points > 0 ? `+${reg.total_points} pts` : "0 pts"}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="space-y-1">
+                                {(reg.predictions || []).map((pred: any) => {
+                                  const gl = pred.match?.goals_local;
+                                  const gv = pred.match?.goals_visitor;
+                                  const hasResult =
+                                    gl !== null && gl !== undefined && gv !== null && gv !== undefined;
+                                  return (
+                                    <div
+                                      key={pred.match_id || pred.id}
+                                      className="flex items-center justify-between gap-2 text-xs"
+                                    >
+                                      <div className="flex items-center gap-1 min-w-0 flex-1 justify-end">
+                                        <span className="truncate text-[#e8eaf0]">
+                                          {pred.match?.team_local}
+                                        </span>
+                                        <Flag team={pred.match?.team_local} size={14} />
+                                      </div>
+                                      <span
+                                        className={`font-mono font-bold flex-shrink-0 ${pred.is_correct ? "text-green-400" : pred.points && pred.points > 0 ? "text-yellow-400" : "text-[#e8eaf0]"}`}
+                                      >
+                                        {pred.goals_local}–{pred.goals_visitor}
+                                      </span>
+                                      <div className="flex items-center gap-1 min-w-0 flex-1">
+                                        <Flag team={pred.match?.team_visitor} size={14} />
+                                        <span className="truncate text-[#e8eaf0]">
+                                          {pred.match?.team_visitor}
+                                        </span>
+                                      </div>
+                                      {hasResult && (
+                                        <span
+                                          className={`text-[10px] flex-shrink-0 ml-1 ${pred.is_correct ? "text-green-400" : pred.points && pred.points > 0 ? "text-yellow-400" : "text-red-400"}`}
+                                        >
+                                          {gl}–{gv}
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       )}
                     </div>
-                    <div className="space-y-1">
-                      {(reg.predictions || []).map((pred: any) => {
-                        const gl = pred.match?.goals_local;
-                        const gv = pred.match?.goals_visitor;
-                        const hasResult =
-                          gl !== null &&
-                          gl !== undefined &&
-                          gv !== null &&
-                          gv !== undefined;
-                        return (
-                          <div
-                            key={pred.match_id || pred.id}
-                            className="flex items-center justify-between gap-2 text-xs"
-                          >
-                            <div className="flex items-center gap-1 min-w-0 flex-1 justify-end">
-                              <span className="truncate text-[#e8eaf0]">
-                                {pred.match?.team_local}
-                              </span>
-                              <Flag team={pred.match?.team_local} size={14} />
-                            </div>
-                            <span
-                              className={`font-mono font-bold flex-shrink-0 ${pred.is_correct ? "text-green-400" : pred.points && pred.points > 0 ? "text-yellow-400" : "text-[#e8eaf0]"}`}
-                            >
-                              {pred.goals_local}–{pred.goals_visitor}
-                            </span>
-                            <div className="flex items-center gap-1 min-w-0 flex-1">
-                              <Flag team={pred.match?.team_visitor} size={14} />
-                              <span className="truncate text-[#e8eaf0]">
-                                {pred.match?.team_visitor}
-                              </span>
-                            </div>
-                            {hasResult && (
-                              <span
-                                className={`text-[10px] flex-shrink-0 ml-1 ${pred.is_correct ? "text-green-400" : pred.points && pred.points > 0 ? "text-yellow-400" : "text-red-400"}`}
-                              >
-                                {gl}–{gv}
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

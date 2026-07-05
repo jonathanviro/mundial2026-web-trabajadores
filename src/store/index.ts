@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Screen, Campaign, Employee, Phase, Match, Prediction, RankingEntry } from '../types'
+import type { Screen, Campaign, Employee, Phase, Match, Prediction, RankingEntry, RankingGroup } from '../types'
 
 interface AppStore {
   screen: Screen
@@ -26,6 +26,12 @@ interface AppStore {
 
   ranking: RankingEntry[]
   setRanking: (r: RankingEntry[]) => void
+
+  rankingGroups: RankingGroup[]
+  setRankingGroups: (g: RankingGroup[]) => void
+
+  activeGroupId: string | null
+  setActiveGroupId: (id: string | null) => void
 
   submitting: boolean
   setSubmitting: (v: boolean) => void
@@ -78,6 +84,12 @@ export const useStore = create<AppStore>((set) => ({
   ranking: [],
   setRanking: (ranking) => set({ ranking }),
 
+  rankingGroups: [],
+  setRankingGroups: (rankingGroups) => set({ rankingGroups }),
+
+  activeGroupId: null,
+  setActiveGroupId: (activeGroupId) => set({ activeGroupId }),
+
   submitting: false,
   setSubmitting: (submitting) => set({ submitting }),
 
@@ -94,6 +106,8 @@ export const useStore = create<AppStore>((set) => ({
       predictions: [],
       champion: null,
       ranking: [],
+      rankingGroups: [],
+      activeGroupId: null,
       submitting: false,
       error: null,
     }),

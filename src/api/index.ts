@@ -45,6 +45,9 @@ export const webApi = {
   getRanking: () =>
     api.get('/web/ranking').then((r) => r.data),
 
+  getRankings: () =>
+    api.get('/web/rankings').then((r) => r.data),
+
   getInstructions: () =>
     api.get('/web/instructions').then((r) => r.data),
 

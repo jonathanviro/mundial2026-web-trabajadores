@@ -81,4 +81,15 @@ export interface RankingResponse {
   phase: { id: number; name: string } | null
 }
 
+export interface RankingGroup {
+  id: string
+  name: string
+  phase_numbers: number[]
+  ranking: RankingEntry[]
+}
+
+export interface RankingsResponse {
+  groups: RankingGroup[]
+}
+
 export type Screen = 'splash' | 'login' | 'dashboard' | 'predict' | 'confirm' | 'success' | 'my-predictions' | 'ranking' | 'done'
