@@ -13,15 +13,24 @@ const LIMITS: { label: string; value: LimitOption }[] = [
 ];
 
 export default function RankingPage() {
-  const { ranking, setRanking, setScreen, employee } = useStore();
+  const {
+    rankingGroups,
+    setRankingGroups,
+    activeGroupId,
+    setActiveGroupId,
+    setScreen,
+    employee,
+  } = useStore();
   const [limit, setLimit] = useState<LimitOption>(10);
 
   useEffect(() => {
-    webApi.getRanking().then((res) => {
-      setRanking(res.ranking || []);
+    webApi.getRankings().then((res) => {
+      setRankingGroups(res.groups || []);
     }).catch(() => {});
   }, []);
 
+  const activeGroup = rankingGroups.find((g) => g.id === activeGroupId) || rankingGroups[0];
+  const ranking = activeGroup?.ranking || [];
   const myEntry = ranking.find((r) => r.code === employee?.code);
   const displayed = limit === 0 ? ranking : ranking.slice(0, limit);
   const showMyPosition = myEntry && (limit === 0 || myEntry.position > limit);
@@ -37,8 +46,27 @@ export default function RankingPage() {
           >
             ← Volver
           </button>
-          <h1 className="font-bold text-base">Ranking General</h1>
+          <h1 className="font-bold text-base">Ranking</h1>
           <div className="w-5" />
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex-shrink-0 px-4 md:px-8 py-3 border-b border-white/10 overflow-x-auto">
+        <div className="flex gap-1.5 max-w-2xl mx-auto">
+          {rankingGroups.map((g) => (
+            <button
+              key={g.id}
+              onClick={() => setActiveGroupId(g.id)}
+              className={`whitespace-nowrap px-2.5 py-1.5 rounded-lg text-[11px] md:text-xs font-semibold transition-all ${
+                activeGroupId === g.id || (!activeGroupId && g === rankingGroups[0])
+                  ? "bg-accent text-white"
+                  : "bg-white/10 text-[#7a8899] hover:text-[#e8eaf0]"
+              }`}
+            >
+              {g.name}
+            </button>
+          ))}
         </div>
       </div>
 
