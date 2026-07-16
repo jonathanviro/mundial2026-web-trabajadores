@@ -135,11 +135,20 @@ export default function DashboardPage() {
         setRegistrations(preds || []);
 
         // Determine active ranking group from current phase
+        // Walk backwards from current phase to find one with data
         const phaseNum = phaseData.phase?.number;
         const groups = rankingsRes.groups || [];
-        const activeGroup = groups.find((g: any) =>
+        const phaseIdx = groups.findIndex((g: any) =>
           g.phase_numbers.includes(phaseNum),
         );
+        const startIdx = phaseIdx >= 0 ? phaseIdx : groups.length - 1;
+        let activeGroup: any = null;
+        for (let i = startIdx; i >= 0; i--) {
+          if (groups[i].ranking?.length > 0) {
+            activeGroup = groups[i];
+            break;
+          }
+        }
         if (activeGroup) {
           setActiveGroupId(activeGroup.id);
         } else if (groups.length > 0) {
